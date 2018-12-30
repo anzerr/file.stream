@@ -33,16 +33,15 @@ class Server {
 
 	run(client, json) {
 		if (json) {
-			console.log(json);
 			if (json.action === ENUM.UPLOAD) {
 				let p = path.join(this.cwd, json.file);
-				fs.mkdir(path.parse(p).dir, {recursive: true}).then(() => {
+				this.mkdir(path.parse(p).dir).then(() => {
 					this.write[json.thread] = fs.createWriteStream(p);
 					client.send(packet.toBuffer({
 						action: ENUM.UPLOAD_RESPONSE,
 						key: json.thread
 					}));
-				}).catch(console.log);
+				});
 			}
 			if (json.action === ENUM.UPLOAD_PART) {
 				this.write[json.thread].write(json.data, () => {
