@@ -9,7 +9,7 @@ npm install --save git+ssh://git@github.com/anzerr/file.stream.git
 
 ### `Example`
 ``` javascript
-const sync = require('file.streams');
+const sync = require('file.stream');
 
 let port = 5936;
 new sync.Server(process.cwd(), 'localhost:' + port);

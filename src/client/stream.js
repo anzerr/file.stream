@@ -35,15 +35,15 @@ class Stream {
 	create(file) {
 		let thread = packet.key(),
 			streamOpen = false,
-			openCb = null;
+			resolve = null,
+			open = new Promise((r) => {
+				resolve = r;
+			});
 
 		this.send({action: ENUM.UPLOAD,	thread: thread, file: file});
 		this.onKey(thread).then(() => {
 			streamOpen = true;
-			if (openCb) {
-				openCb();
-				openCb = null;
-			}
+			resolve();
 		});
 
 		let w = new Writable({
@@ -56,20 +56,27 @@ class Stream {
 					data: chunk
 				};
 				if (!streamOpen) {
-					openCb = () => {
+					open.then(() => {
 						this.send(payload);
 						this.onKey(key).then(callback);
-					};
+					});
 				} else {
 					this.send(payload);
 					this.onKey(key).then(callback);
 				}
 			},
 			final: (callback) => {
-				this.send({action: ENUM.UPLOAD_END, thread: thread}).then(() => {
-					callback();
-					w.destroy();
-				});
+				let s = () => {
+					this.send({action: ENUM.UPLOAD_END, thread: thread}).then(() => {
+						callback();
+						w.destroy();
+					});
+				};
+				if (!streamOpen) {
+					open.then(s);
+				} else {
+					s();
+				}
 			}
 		});
 		return w;
