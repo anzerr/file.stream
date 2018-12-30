@@ -7,7 +7,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "anzerr",
 	"license": "ISC",
 	"dependencies": {
 		"fs.promisify": "git+ssh://git@github.com/anzerr/fs.promisify.git",
@@ -21,5 +21,17 @@
 	},
 	"eslintConfig": {
 		"extends": "eslint-config-basic"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/anzerr/file.stream.git"
+	},
+	"engines": {
+		"node": ">= 0.10.0"
+	},
+	"types": "index.d.ts",
+	"bugs": {
+		"url": "https://github.com/anzerr/file.stream/issues"
+	},
+	"homepage": "https://github.com/anzerr/file.stream#readme"
 }
