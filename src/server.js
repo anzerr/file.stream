@@ -17,10 +17,27 @@ class Server extends require('events') {
 		this.server.on('message', (res) => {
 			this.run(res.client, packet.toJson(res.payload));
 		});
+		this.server.on('close', (e) => {
+			this.emit('close', e);
+		});
+		this.server.on('open', () => {
+			this.emit('open');
+		});
+		this.server.on('error', (e) => {
+			this.emit('error', e);
+		});
 	}
 
 	close() {
 		return this.server.close();
+	}
+
+	error(client, e) {
+		this.emit('error', e);
+		client.send(packet.toBuffer({
+			action: ENUM.ERROR,
+			error: e.toString()
+		}));
 	}
 
 	mkdir(dir) {
@@ -41,18 +58,25 @@ class Server extends require('events') {
 					client.send(packet.toBuffer({
 						action: ENUM.UPLOAD_RESPONSE,
 						key: json.thread
-					}));
-				});
+					})).catch((e) => this.error(client, e));
+				}).catch((e) => this.error(client, e));
 			}
 			if (json.action === ENUM.UPLOAD_PART) {
-				this.write[json.thread][1].write(json.data, () => {
+				this.write[json.thread][1].write(json.data, (err) => {
+					if (err) {
+						this.error(client, err);
+					}
 					client.send(packet.toBuffer({
 						action: ENUM.UPLOAD_RESPONSE,
 						key: json.key
-					}));
+					})).catch((e) => this.error(client, e));
 				});
 			}
 			if (json.action === ENUM.UPLOAD_END) {
+				if (!this.write[json.thread]) {
+					this.error(client, new Error('missing write stream on server.'));
+					return;
+				}
 				this.write[json.thread][1].end();
 				this.emit('add', this.write[json.thread][0]);
 				this.write[json.thread] = null;
@@ -64,8 +88,8 @@ class Server extends require('events') {
 					client.send(packet.toBuffer({
 						action: ENUM.UPLOAD_RESPONSE,
 						key: json.thread
-					}));
-				});
+					})).catch((e) => this.error(client, e));
+				}).catch((e) => this.error(client, e));
 			}
 		}
 	}

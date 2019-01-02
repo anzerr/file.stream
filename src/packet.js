@@ -44,6 +44,12 @@ class Packet {
 				file: buffer.slice(6, buffer.length).toString()
 			};
 		}
+		if (buffer[0] === ENUM.ERROR) {
+			return {
+				action: ENUM.ERROR,
+				error: buffer.slice(1, buffer.length)
+			};
+		}
 		throw new Error('packet format not handled');
 	}
 
@@ -79,6 +85,12 @@ class Packet {
 			b[0] = ENUM.REMOVE;
 			b.writeUIntBE(json.thread, 1, 4);
 			b.write(json.file, 6);
+			return b;
+		}
+		if (json.action === ENUM.REMOVE) {
+			let b = Buffer.alloc(json.error.length + 1 + 1);
+			b[0] = ENUM.REMOVE;
+			b.write(json.error, 1);
 			return b;
 		}
 		throw new Error('packet format not handled');

@@ -18,10 +18,20 @@ class Client extends require('events') {
 			this.connected = true;
 			resolve();
 		});
+		this.client.on('error', (e) => {
+			this.emit('error', e);
+		});
+		this.server.on('close', (e) => {
+			this.emit('close', e);
+		});
 		this.client.on('message', (res) => {
 			let json = packet.toJson(res);
 			if (json.action === ENUM.UPLOAD_RESPONSE) {
 				this.emit(json.key);
+				return;
+			}
+			if (json.action === ENUM.ERROR) {
+				this.emit('error', json.error);
 			}
 		});
 		this._stream = new Stream(this);
