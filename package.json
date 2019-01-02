@@ -8,7 +8,7 @@
 	},
 	"keywords": [],
 	"author": "anzerr",
-	"license": "ISC",
+	"license": "MIT",
 	"dependencies": {
 		"fs.promisify": "git+ssh://git@github.com/anzerr/fs.promisify.git",
 		"fs.remove": "git+ssh://git@github.com/anzerr/fs.remove.git",

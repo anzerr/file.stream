@@ -21,7 +21,7 @@ class Client extends require('events') {
 		this.client.on('error', (e) => {
 			this.emit('error', e);
 		});
-		this.server.on('close', (e) => {
+		this.client.on('close', (e) => {
 			this.emit('close', e);
 		});
 		this.client.on('message', (res) => {
