@@ -46,6 +46,12 @@ class Server extends require('events') {
 		}
 		return fs.mkdir(dir, {recursive: true}).then(() => {
 			this._setup[dir] = true;
+		}).catch((error) => {
+			if (error && error.code === 'EEXIST') {
+				this._setup[dir] = true;
+			} else {
+				throw error;
+			}
 		});
 	}
 

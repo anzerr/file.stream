@@ -3,6 +3,12 @@ const sync = require('./index.js'),
 	fs = require('fs.promisify'),
 	assert = require('assert');
 
+fs.mkdir('./src', {recursive: true}).then((e) => {
+	console.log('mkdir', e);
+}).catch((e) => {
+	console.log('mkdir e', e);
+});
+
 let port = 5936;
 
 let s = new sync.Server(process.cwd(), 'localhost:' + port);
