@@ -10,6 +10,7 @@
 	"author": "anzerr",
 	"license": "MIT",
 	"dependencies": {
+		"fs.mkdirp": "git+ssh://git@github.com/anzerr/fs.mkdirp.git",
 		"fs.promisify": "git+ssh://git@github.com/anzerr/fs.promisify.git",
 		"fs.remove": "git+ssh://git@github.com/anzerr/fs.remove.git",
 		"net.socket": "git+ssh://git@github.com/anzerr/net.socket.git",

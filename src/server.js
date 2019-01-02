@@ -4,6 +4,7 @@ const net = require('net.socket'),
 	remove = require('fs.remove'),
 	packet = require('./packet.js'),
 	path = require('path'),
+	mkdir = require('fs.mkdirp'),
 	ENUM = require('./enum.js');
 
 class Server extends require('events') {
@@ -44,14 +45,8 @@ class Server extends require('events') {
 		if (this._setup[dir]) {
 			return Promise.resolve();
 		}
-		return fs.mkdir(dir, {recursive: true}).then(() => {
+		return mkdir(dir).then(() => {
 			this._setup[dir] = true;
-		}).catch((error) => {
-			if (error && error.code === 'EEXIST') {
-				this._setup[dir] = true;
-			} else {
-				throw error;
-			}
 		});
 	}
 

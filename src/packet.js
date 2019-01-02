@@ -87,9 +87,9 @@ class Packet {
 			b.write(json.file, 6);
 			return b;
 		}
-		if (json.action === ENUM.REMOVE) {
+		if (json.action === ENUM.ERROR) {
 			let b = Buffer.alloc(json.error.length + 1 + 1);
-			b[0] = ENUM.REMOVE;
+			b[0] = ENUM.ERROR;
 			b.write(json.error, 1);
 			return b;
 		}
