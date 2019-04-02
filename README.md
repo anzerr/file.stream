@@ -4,7 +4,7 @@ A client and server to handle streaming files with pipes and remove them from a 
 
 #### `Install`
 ``` bash
-npm install --save git+http://git@github.com/anzerr/file.stream.git
+npm install --save git+https://git@github.com/anzerr/file.stream.git
 ```
 
 ### `Example`

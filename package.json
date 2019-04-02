@@ -10,15 +10,15 @@
 	"author": "anzerr",
 	"license": "MIT",
 	"dependencies": {
-		"fs.mkdirp": "git+http://git@github.com/anzerr/fs.mkdirp.git",
-		"fs.promisify": "git+http://git@github.com/anzerr/fs.promisify.git",
-		"fs.remove": "git+http://git@github.com/anzerr/fs.remove.git",
-		"net.socket": "git+http://git@github.com/anzerr/net.socket.git",
-		"unique.util": "git+http://git@github.com/anzerr/unique.util.git"
+		"fs.mkdirp": "git+https://git@github.com/anzerr/fs.mkdirp.git",
+		"fs.promisify": "git+https://git@github.com/anzerr/fs.promisify.git",
+		"fs.remove": "git+https://git@github.com/anzerr/fs.remove.git",
+		"net.socket": "git+https://git@github.com/anzerr/net.socket.git",
+		"unique.util": "git+https://git@github.com/anzerr/unique.util.git"
 	},
 	"devDependencies": {
 		"eslint": "^5.11.1",
-		"eslint-config-basic": "git+http://git@github.com/anzerr/eslintrc.git"
+		"eslint-config-basic": "git+https://git@github.com/anzerr/eslintrc.git"
 	},
 	"eslintConfig": {
 		"extends": "eslint-config-basic"
