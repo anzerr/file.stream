@@ -3,10 +3,14 @@ const ENUM = require('./enum.js');
 
 class Packet {
 
-	constructor() {}
+	constructor() {
+		this._id = 1;
+	}
 
-	key(l = 4) {
-		return Math.floor(Math.random() * Math.pow(255, l));
+	key() {
+		this._id = (this._id + 1 % 0xffffffff);
+		// return Math.floor(Math.random() * Math.pow(255, l));
+		return this._id;
 	}
 
 	toJson(buffer) {
@@ -50,6 +54,20 @@ class Packet {
 				error: buffer.slice(1, buffer.length)
 			};
 		}
+		if (buffer[0] === ENUM.HASH) {
+			return {
+				action: ENUM.HASH,
+				thread: buffer.readUIntBE(1, 4),
+				file: buffer.slice(6, buffer.length).toString()
+			};
+		}
+		if (buffer[0] === ENUM.HASH_RESPONSE) {
+			return {
+				action: ENUM.HASH_RESPONSE,
+				thread: buffer.readUIntBE(1, 4),
+				hash: buffer.slice(6, buffer.length).toString()
+			};
+		}
 		throw new Error('packet format not handled');
 	}
 
@@ -87,10 +105,30 @@ class Packet {
 			b.write(json.file, 6);
 			return b;
 		}
+		if (json.action === ENUM.REMOVE_RESPONSE) {
+			let b = Buffer.alloc(4 + 1);
+			b[0] = ENUM.HASH_RESPONSE;
+			b.writeUIntBE(json.thread, 1, 4);
+			return b;
+		}
 		if (json.action === ENUM.ERROR) {
 			let b = Buffer.alloc(json.error.length + 1 + 1);
 			b[0] = ENUM.ERROR;
 			b.write(json.error, 1);
+			return b;
+		}
+		if (json.action === ENUM.HASH) {
+			let b = Buffer.alloc(json.file.length + 1 + 4 + 1);
+			b[0] = ENUM.HASH;
+			b.writeUIntBE(json.thread, 1, 4);
+			b.write(json.file, 6);
+			return b;
+		}
+		if (json.action === ENUM.HASH_RESPONSE) {
+			let b = Buffer.alloc(json.hash.length + 1 + 4 + 1);
+			b[0] = ENUM.HASH_RESPONSE;
+			b.writeUIntBE(json.thread, 1, 4);
+			b.write(json.hash, 6);
 			return b;
 		}
 		throw new Error('packet format not handled');

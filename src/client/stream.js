@@ -5,12 +5,12 @@ const {Writable} = require('stream'),
 
 class Stream {
 
-	constructor(handle) {
-		this.handle = handle;
-	}
-
 	get client() {
 		return this.handle.client;
+	}
+
+	constructor(handle) {
+		this.handle = handle;
 	}
 
 	send(data) {
@@ -22,10 +22,14 @@ class Stream {
 		});
 	}
 
-	onKey(key) {
+	on(key) {
 		return new Promise((resolve) => {
-			let msg = () => {
-				resolve();
+			let msg = (res) => {
+				if (res.action === ENUM.HASH_RESPONSE) {
+					resolve(res);
+				} else {
+					resolve();
+				}
 				this.handle.removeListener(key, msg);
 			};
 			this.handle.on(key, msg);
@@ -41,7 +45,7 @@ class Stream {
 			});
 
 		this.send({action: ENUM.UPLOAD,	thread: thread, file: file});
-		this.onKey(thread).then(() => {
+		this.on(thread).then(() => {
 			streamOpen = true;
 			resolve();
 		});
@@ -58,11 +62,11 @@ class Stream {
 				if (!streamOpen) {
 					open.then(() => {
 						this.send(payload);
-						this.onKey(key).then(callback);
+						this.on(key).then(callback);
 					});
 				} else {
 					this.send(payload);
-					this.onKey(key).then(callback);
+					this.on(key).then(callback);
 				}
 			},
 			final: (callback) => {

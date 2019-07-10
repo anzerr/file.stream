@@ -5,5 +5,8 @@ module.exports = {
 	UPLOAD_PART: 2,
 	UPLOAD_RESPONSE: 3,
 	REMOVE: 4,
-	ERROR: 5
+	REMOVE_RESPONSE: 5,
+	ERROR: 6,
+	HASH: 7,
+	HASH_RESPONSE: 8
 };

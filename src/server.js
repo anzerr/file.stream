@@ -5,7 +5,8 @@ const net = require('net.socket'),
 	packet = require('./packet.js'),
 	path = require('path'),
 	mkdir = require('fs.mkdirp'),
-	ENUM = require('./enum.js');
+	ENUM = require('./enum.js'),
+	crypto = require('crypto');
 
 class Server extends require('events') {
 
@@ -16,16 +17,21 @@ class Server extends require('events') {
 		this._setup = {};
 		this.server = new net.Server(uri);
 		this.server.on('message', (res) => {
-			this.run(res.client, packet.toJson(res.payload));
-		});
-		this.server.on('close', (e) => {
+			this.run(res.client, packet.toJson(res.payload))
+				.catch((err) => {
+					res.client.close();
+					this.emit('error', err);
+				});
+		}).on('close', (e) => {
 			this.emit('close', e);
-		});
-		this.server.on('open', () => {
+		}).on('open', () => {
 			this.emit('open');
-		});
-		this.server.on('error', (e) => {
+		}).on('error', (e) => {
 			this.emit('error', e);
+		}).on('connect', (client) => {
+			client.on('error', (e) => {
+				this.emit('error', e);
+			});
 		});
 	}
 
@@ -42,11 +48,11 @@ class Server extends require('events') {
 	}
 
 	mkdir(dir) {
-		if (this._setup[dir]) {
+		if (this._setup[dir] && this._setup[dir] > Date.now()) {
 			return Promise.resolve();
 		}
 		return mkdir(dir).then(() => {
-			this._setup[dir] = true;
+			this._setup[dir] = Date.now() + (1000 * 10);
 		});
 	}
 
@@ -54,23 +60,25 @@ class Server extends require('events') {
 		if (json) {
 			if (json.action === ENUM.UPLOAD) {
 				let p = path.join(this.cwd, json.file);
-				this.mkdir(path.parse(p).dir).then(() => {
+				return this.mkdir(path.parse(p).dir).then(() => {
 					this.write[json.thread] = [p, fs.createWriteStream(p)];
-					client.send(packet.toBuffer({
+					return client.send(packet.toBuffer({
 						action: ENUM.UPLOAD_RESPONSE,
 						key: json.thread
 					})).catch((e) => this.error(client, e));
 				}).catch((e) => this.error(client, e));
 			}
 			if (json.action === ENUM.UPLOAD_PART) {
-				this.write[json.thread][1].write(json.data, (err) => {
-					if (err) {
-						this.error(client, err);
-					}
-					client.send(packet.toBuffer({
-						action: ENUM.UPLOAD_RESPONSE,
-						key: json.key
-					})).catch((e) => this.error(client, e));
+				return new Promise((resolve) => {
+					this.write[json.thread][1].write(json.data, (err) => {
+						if (err) {
+							this.error(client, err);
+						}
+						client.send(packet.toBuffer({
+							action: ENUM.UPLOAD_RESPONSE,
+							key: json.key
+						})).then(() => resolve()).catch((e) => this.error(client, e));
+					});
 				});
 			}
 			if (json.action === ENUM.UPLOAD_END) {
@@ -81,18 +89,35 @@ class Server extends require('events') {
 				this.write[json.thread][1].end();
 				this.emit('add', this.write[json.thread][0]);
 				this.write[json.thread] = null;
+				return Promise.resolve();
 			}
 			if (json.action === ENUM.REMOVE) {
 				let p = path.join(this.cwd, json.file);
-				remove(p).then(() => {
+				return remove(p).then(() => {
 					this.emit('remove', p);
-					client.send(packet.toBuffer({
-						action: ENUM.UPLOAD_RESPONSE,
-						key: json.thread
+					return client.send(packet.toBuffer({
+						action: ENUM.REMOVE_RESPONSE,
+						thread: json.thread
 					})).catch((e) => this.error(client, e));
 				}).catch((e) => this.error(client, e));
 			}
+			if (json.action === ENUM.HASH) {
+				let p = path.join(this.cwd, json.file);
+				return new Promise((resolve) => {
+					fs.createReadStream(p)
+						.pipe(crypto.createHash('sha1').setEncoding('hex'))
+						.on('finish', function () {
+							let hash = this.read();
+							client.send(packet.toBuffer({
+								action: ENUM.HASH_RESPONSE,
+								hash: hash,
+								thread: json.thread
+							})).then(() => resolve()).catch((e) => this.error(client, e));
+						});
+				});
+			}
 		}
+		return Promise.reject(new Error(`failed to use packet "${(json || {}).action}" is the client valid?`));
 	}
 
 }
