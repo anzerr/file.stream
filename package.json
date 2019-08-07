@@ -1,6 +1,6 @@
 {
 	"name": "file.stream",
-	"version": "1.0.3",
+	"version": "1.0.6",
 	"keywords": [],
 	"homepage": "https://github.com/anzerr/file.stream#readme",
 	"bugs": {
@@ -28,7 +28,6 @@
 		"unique.util": "git+https://git@github.com/anzerr/unique.util.git"
 	},
 	"devDependencies": {
-		"eslint": "5.11.1",
 		"eslint-config-basic": "git+https://git@github.com/anzerr/eslintrc.git"
 	},
 	"engines": {

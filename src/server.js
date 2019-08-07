@@ -103,17 +103,25 @@ class Server extends require('events') {
 			}
 			if (json.action === ENUM.HASH) {
 				let p = path.join(this.cwd, json.file);
-				return new Promise((resolve) => {
-					fs.createReadStream(p)
-						.pipe(crypto.createHash('sha1').setEncoding('hex'))
-						.on('finish', function () {
-							let hash = this.read();
-							client.send(packet.toBuffer({
-								action: ENUM.HASH_RESPONSE,
-								hash: hash,
-								thread: json.thread
-							})).then(() => resolve()).catch((e) => this.error(client, e));
-						});
+				return fs.access(p).then(() => {
+					return new Promise((resolve) => {
+						fs.createReadStream(p)
+							.pipe(crypto.createHash('sha1').setEncoding('hex'))
+							.on('finish', function () {
+								let hash = this.read();
+								client.send(packet.toBuffer({
+									action: ENUM.HASH_RESPONSE,
+									hash: hash,
+									thread: json.thread
+								})).then(() => resolve()).catch((e) => this.error(client, e));
+							});
+					});
+				}).catch(() => {
+					client.send(packet.toBuffer({
+						action: ENUM.HASH_RESPONSE,
+						hash: '',
+						thread: json.thread
+					})).catch((e) => this.error(client, e));
 				});
 			}
 		}

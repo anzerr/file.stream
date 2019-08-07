@@ -62,6 +62,9 @@ Promise.all(wait).then(() => {// get hash for files
 		client.connect();
 		client.hash('example.js').then((res) => {
 			assert.notEqual(res.match(/^[a-f0-9]{40}$/), null);
+			return client.hash('examplea.js');
+		}).then((res) => {
+			assert.equal(res, '');
 		}).then(() => {
 			return s.close();
 		}).then(() => {
