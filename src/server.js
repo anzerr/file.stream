@@ -1,12 +1,12 @@
 
-const net = require('net.socket'),
+const path = require('path'),
+	net = require('net.socket'),
 	fs = require('fs.promisify'),
+	hash = require('fs.hash'),
 	remove = require('fs.remove'),
-	packet = require('./packet.js'),
-	path = require('path'),
 	mkdir = require('fs.mkdirp'),
-	ENUM = require('./enum.js'),
-	crypto = require('crypto');
+	packet = require('./packet.js'),
+	ENUM = require('./enum.js');
 
 class Server extends require('events') {
 
@@ -68,6 +68,7 @@ class Server extends require('events') {
 					})).catch((e) => this.error(client, e));
 				}).catch((e) => this.error(client, e));
 			}
+
 			if (json.action === ENUM.UPLOAD_PART) {
 				return new Promise((resolve) => {
 					this.write[json.thread][1].write(json.data, (err) => {
@@ -81,6 +82,7 @@ class Server extends require('events') {
 					});
 				});
 			}
+
 			if (json.action === ENUM.UPLOAD_END) {
 				if (!this.write[json.thread]) {
 					this.error(client, new Error('missing write stream on server.'));
@@ -91,6 +93,7 @@ class Server extends require('events') {
 				this.write[json.thread] = null;
 				return Promise.resolve();
 			}
+
 			if (json.action === ENUM.REMOVE) {
 				let p = path.join(this.cwd, json.file);
 				return remove(p).then(() => {
@@ -101,21 +104,17 @@ class Server extends require('events') {
 					})).catch((e) => this.error(client, e));
 				}).catch((e) => this.error(client, e));
 			}
+
 			if (json.action === ENUM.HASH) {
 				let p = path.join(this.cwd, json.file);
 				return fs.access(p).then(() => {
-					return new Promise((resolve) => {
-						fs.createReadStream(p)
-							.pipe(crypto.createHash('sha1').setEncoding('hex'))
-							.on('finish', function () {
-								let hash = this.read();
-								client.send(packet.toBuffer({
-									action: ENUM.HASH_RESPONSE,
-									hash: hash,
-									thread: json.thread
-								})).then(() => resolve()).catch((e) => this.error(client, e));
-							});
-					});
+					return hash(p);
+				}).then((res) => {
+					return client.send(packet.toBuffer({
+						action: ENUM.HASH_RESPONSE,
+						hash: res,
+						thread: json.thread
+					})).catch((e) => this.error(client, e));
 				}).catch(() => {
 					client.send(packet.toBuffer({
 						action: ENUM.HASH_RESPONSE,

@@ -21,7 +21,7 @@ let stream = (a, b) => {
 // uploaded files
 let wait = [];
 for (let i = 0; i < 10; i++) {
-	wait.push(stream('./example.js', 'example' + i + '.js'));
+	wait.push(stream('./test.js', 'example_' + i + '.js'));
 }
 
 let start = process.hrtime();
@@ -32,10 +32,10 @@ Promise.all(wait).then(() => {// get hash for files
 
 	let hash = [];
 	for (let i = 0; i < 10; i++) {
-		hash.push(client.hash('example' + i + '.js'));
+		hash.push(client.hash('example_' + i + '.js'));
 	}
 	return Promise.all(hash).then((res) => {
-		assert.notEqual(res[0].match(/^[a-f0-9]{40}$/), null);
+		assert.notEqual(res[0].match(/^[a-f0-9]{64}$/), null);
 		for (let i = 1; i < 10; i++) {
 			assert.equal(res[i - 1], res[i]);
 		}
@@ -43,7 +43,7 @@ Promise.all(wait).then(() => {// get hash for files
 }).then(() => { // remove files
 	let remove = [];
 	for (let i = 0; i < 10; i++) {
-		remove.push(client.remove('example' + i + '.js'));
+		remove.push(client.remove('example_' + i + '.js'));
 	}
 	return Promise.all(remove);
 }).then(async () => {
@@ -58,10 +58,9 @@ Promise.all(wait).then(() => {// get hash for files
 		assert.notEqual(err.message.match('ECONNREFUSED'), null);
 	});
 	client.once('close', () => {
-		console.log('closed client');
 		client.connect();
-		client.hash('example.js').then((res) => {
-			assert.notEqual(res.match(/^[a-f0-9]{40}$/), null);
+		client.hash('test.js').then((res) => {
+			assert.notEqual(res.match(/^[a-f0-9]{64}$/), null);
 			return client.hash('examplea.js');
 		}).then((res) => {
 			assert.equal(res, '');
@@ -69,7 +68,13 @@ Promise.all(wait).then(() => {// get hash for files
 			return s.close();
 		}).then(() => {
 			console.log('done');
+			client.close();
+		}).catch((err) => {
+			console.log(err);
+			process.exit(1);
 		});
 	});
-	console.log('example finished');
-}).catch(console.log);
+}).catch((err) => {
+	console.log(err);
+	process.exit(1);
+});

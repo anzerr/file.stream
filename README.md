@@ -1,5 +1,9 @@
 
 ### `Intro`
+![GitHub Actions status | linter](https://github.com/anzerr/file.stream/workflows/linter/badge.svg)
+![GitHub Actions status | publish](https://github.com/anzerr/file.stream/workflows/publish/badge.svg)
+![GitHub Actions status | test](https://github.com/anzerr/file.stream/workflows/test/badge.svg)
+
 A client and server to handle streaming files with pipes and remove them from a remote server
 
 #### `Install`
