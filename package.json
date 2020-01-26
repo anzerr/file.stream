@@ -2,7 +2,13 @@
 	"name": "file.stream",
 	"version": "1.0.10",
 	"description": "pipe files over socket",
-	"keywords": [],
+	"keywords": [
+		"fs",
+		"nodejs",
+		"socket",
+		"stream",
+		"util"
+	],
 	"homepage": "https://github.com/anzerr/file.stream#readme",
 	"bugs": {
 		"url": "https://github.com/anzerr/file.stream/issues"
