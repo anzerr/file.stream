@@ -73,7 +73,7 @@ class Packet {
 
 	toBuffer(json) {
 		if (json.action === ENUM.UPLOAD) {
-			let b = Buffer.alloc(json.file.length + 1 + 4 + 1);
+			let b = Buffer.alloc(Buffer.byteLength(json.file, 'utf8') + 1 + 4 + 1);
 			b[0] = ENUM.UPLOAD;
 			b.writeUIntBE(json.thread, 1, 4);
 			b.write(json.file, 6);
@@ -99,7 +99,7 @@ class Packet {
 			return b;
 		}
 		if (json.action === ENUM.REMOVE) {
-			let b = Buffer.alloc(json.file.length + 1 + 4 + 1);
+			let b = Buffer.alloc(Buffer.byteLength(json.file, 'utf8') + 1 + 4 + 1);
 			b[0] = ENUM.REMOVE;
 			b.writeUIntBE(json.thread, 1, 4);
 			b.write(json.file, 6);
@@ -118,7 +118,7 @@ class Packet {
 			return b;
 		}
 		if (json.action === ENUM.HASH) {
-			let b = Buffer.alloc(json.file.length + 1 + 4 + 1);
+			let b = Buffer.alloc(Buffer.byteLength(json.file, 'utf8') + 1 + 4 + 1);
 			b[0] = ENUM.HASH;
 			b.writeUIntBE(json.thread, 1, 4);
 			b.write(json.file, 6);

@@ -59,8 +59,14 @@ class Server extends require('events') {
 	run(client, json) {
 		if (json) {
 			if (json.action === ENUM.UPLOAD) {
-				let p = path.join(this.cwd, json.file);
-				return this.mkdir(path.parse(p).dir).then(() => {
+				let p = path.join(this.cwd, json.file), dir = path.parse(p).dir;
+				return fs.stat(dir).then((stats) => {
+					if (!stats.isDirectory()) {
+						return remove(dir);
+					}
+				}).catch(() => {}).then(() => {
+					return this.mkdir(dir);
+				}).then(() => {
 					this.write[json.thread] = [p, fs.createWriteStream(p)];
 					return client.send(packet.toBuffer({
 						action: ENUM.UPLOAD_RESPONSE,
