@@ -1,6 +1,6 @@
 {
 	"name": "file.stream",
-	"version": "1.0.16",
+	"version": "1.0.17",
 	"description": "pipe files over socket",
 	"keywords": [
 		"fs",
